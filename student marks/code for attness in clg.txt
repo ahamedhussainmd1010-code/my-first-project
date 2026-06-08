@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>College Attendance System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+        }
+
+        input {
+            padding: 10px;
+            margin: 5px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: #f4f4f4;
+            margin: 5px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>College Attendance Tracker</h1>
+
+<input type="text" id="studentName" placeholder="Enter Student Name">
+<button onclick="markAttendance()">Present</button>
+
+<h2>Attendance List</h2>
+<ul id="attendanceList"></ul>
+
+<script>
+function markAttendance() {
+    let name = document.getElementById("studentName").value;
+
+    if (name === "") {
+        alert("Enter a student name");
+        return;
+    }
+
+    let li = document.createElement("li");
+    li.textContent = name + " - Present";
+
+    document.getElementById("attendanceList").appendChild(li);
+    document.getElementById("studentName").value = "";
+}
+</script>
+
+</body>
+</html>
+code for attness in clg

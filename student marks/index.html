@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College Student Result Management System</title>
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- SheetJS for Excel Export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  
+  <!-- jsPDF & AutoTable for PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  
+  <!-- Chart.js for stats charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar glass-panel" id="appSidebar">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="logo-text">
+          EduGrade
+          <span>Result Manager</span>
+        </div>
+      </div>
+      
+      <ul class="nav-links">
+        <li class="nav-item active" data-target="dashboard">
+          <a href="#dashboard">
+            <i class="fa-solid fa-chart-line"></i>
+            Dashboard
+          </a>
+        </li>
+        <li class="nav-item" data-target="add-student" id="navAddStudent">
+          <a href="#add-student">
+            <i class="fa-solid fa-user-plus"></i>
+            Add Student
+          </a>
+        </li>
+        <li class="nav-item" data-target="records">
+          <a href="#records">
+            <i class="fa-solid fa-address-book"></i>
+            Student Records
+          </a>
+        </li>
+      </ul>
+      
+      <div class="sidebar-footer">
+        <button class="theme-toggle-btn" id="themeToggleBtn">
+          <i class="fa-solid fa-moon"></i>
+          <span id="themeToggleText">Dark Mode</span>
+        </button>
+      </div>
+    </aside>
+    
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Header -->
+      <header class="app-header">
+        <div class="header-title">
+          <button class="mobile-menu-btn" id="mobileMenuToggle">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <h1 id="pageTitle">Dashboard</h1>
+          <p id="pageSubtitle">Welcome back! Here's the performance overview of your college students.</p>
+        </div>
+        
+        <div class="header-actions">
+          <div class="user-profile glass-panel">
+            <div class="user-avatar">AD</div>
+            <div class="user-info">
+              <div class="user-name">Admin Portal</div>
+              <div class="user-role">Registrar Staff</div>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <!-- SECTION: Dashboard -->
+      <section id="dashboard-section" class="app-section active">
+        <!-- Stats Widgets -->
+        <div class="stats-grid">
+          <!-- Total Students -->
+          <div class="stat-card glass-panel">
+            <div class="stat-icon-container blue">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stat-details">
+              <span class="stat-label">Total Students</span>
+              <span class="stat-value" id="statTotalStudents">0</span>
+            </div>
+          </div>
+          <!-- Average Percentage -->
+          <div class="stat-card glass-panel">
+            <div class="stat-icon-container green">
+              <i class="fa-solid fa-percent"></i>
+            </div>
+            <div class="stat-details">
+              <span class="stat-label">Average Percentage</span>
+              <span class="stat-value" id="statAveragePct">0.0%</span>
+            </div>
+          </div>
+          <!-- Highest Score -->
+          <div class="stat-card glass-panel">
+            <div class="stat-icon-container orange">
+              <i class="fa-solid fa-award"></i>
+            </div>
+            <div class="stat-details">
+              <span class="stat-label">Highest Score</span>
+              <span class="stat-value" id="statHighestPct">0.0%</span>
+            </div>
+          </div>
+          <!-- Lowest Score -->
+          <div class="stat-card glass-panel">
+            <div class="stat-icon-container red">
+              <i class="fa-solid fa-circle-down"></i>
+            </div>
+            <div class="stat-details">
+              <span class="stat-label">Lowest Score</span>
+              <span class="stat-value" id="statLowestPct">0.0%</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Detailed Analytics & Top Scorer -->
+        <div class="dashboard-insights">
+          <!-- Charts Section -->
+          <div class="chart-panel glass-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <i class="fa-solid fa-chart-simple text-blue"></i>
+                Subject Averages & Performance Bands
+              </h2>
+            </div>
+            <div style="position: relative; flex: 1; min-height: 280px; width: 100%;">
+              <canvas id="performanceChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Top Scorer Spotlight -->
+          <div class="spotlight-card glass-panel">
+            <div class="spotlight-header">
+              <span class="spotlight-title">Top Performer</span>
+              <div><i class="fa-solid fa-crown crown-icon"></i></div>
+            </div>
+            <div class="spotlight-body" id="spotlightBody">
+              <!-- Dynamically populated or empty state -->
+              <p class="spotlight-name" id="spotlightName">No Records Yet</p>
+              <p class="spotlight-id" id="spotlightId">ID: N/A</p>
+              <p class="spotlight-score" id="spotlightScore">--%</p>
+              <span class="spotlight-score-label">Overall Marks: <span id="spotlightTotalMarks">0</span>/400</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- SECTION: Add / Edit Student Form -->
+      <section id="add-student-section" class="app-section">
+        <div class="form-panel glass-panel">
+          <div class="panel-header">
+            <h2 class="panel-title" id="formSectionTitle">
+              <i class="fa-solid fa-user-plus text-blue"></i>
+              Register New Student & Marks
+            </h2>
+          </div>
+          
+          <form id="studentForm" novalidate>
+            <!-- Hidden field to track edit mode -->
+            <input type="hidden" id="editStudentId" value="">
+            
+            <div class="form-grid">
+              <!-- Student Name -->
+              <div class="form-group form-group-full">
+                <label for="studentName">Student Name</label>
+                <div class="input-container">
+                  <i class="fa-solid fa-user"></i>
+                  <input type="text" id="studentName" class="form-input" placeholder="Enter full name" required>
+                </div>
+              </div>
+              
+              <!-- Student ID -->
+              <div class="form-group">
+                <label for="studentId">Student ID / Roll No</label>
+                <div class="input-container">
+                  <i class="fa-solid fa-id-card"></i>
+                  <input type="text" id="studentId" class="form-input" placeholder="e.g. CS2026-001" required>
+                </div>
+              </div>
+              
+              <!-- Academic Year -->
+              <div class="form-group">
+                <label for="academicYear">Academic Year</label>
+                <div class="input-container">
+                  <i class="fa-solid fa-calendar"></i>
+                  <select id="academicYear" class="form-input" required>
+                    <option value="" disabled selected>Select Year</option>
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                    <option value="3rd Year">3rd Year</option>
+                    <option value="4th Year">4th Year</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Marks: English -->
+              <div class="form-group">
+                <label for="englishMarks">English Marks (0-100)</label>
+                <div class="input-container marks-input no-icon">
+                  <input type="number" id="englishMarks" class="form-input mark-field" placeholder="0 - 100" min="0" max="100" required>
+                </div>
+              </div>
+              
+              <!-- Marks: Physics -->
+              <div class="form-group">
+                <label for="physicsMarks">Physics Marks (0-100)</label>
+                <div class="input-container marks-input no-icon">
+                  <input type="number" id="physicsMarks" class="form-input mark-field" placeholder="0 - 100" min="0" max="100" required>
+                </div>
+              </div>
+              
+              <!-- Marks: Mathematics -->
+              <div class="form-group">
+                <label for="mathsMarks">Mathematics Marks (0-100)</label>
+                <div class="input-container marks-input no-icon">
+                  <input type="number" id="mathsMarks" class="form-input mark-field" placeholder="0 - 100" min="0" max="100" required>
+                </div>
+              </div>
+              
+              <!-- Marks: Hindi -->
+              <div class="form-group">
+                <label for="hindiMarks">Hindi Marks (0-100)</label>
+                <div class="input-container marks-input no-icon">
+                  <input type="number" id="hindiMarks" class="form-input mark-field" placeholder="0 - 100" min="0" max="100" required>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Real-time Live Calculations -->
+            <div class="form-summary-box">
+              <div class="summary-item">
+                <span class="summary-lbl">Total Marks</span>
+                <span class="summary-val" id="liveTotal">0 / 400</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-lbl">Percentage</span>
+                <span class="summary-val" id="livePercentage">0.0%</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-lbl">Grade Category</span>
+                <span class="summary-val" id="liveGrade">--</span>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" id="resetFormBtn">
+                <i class="fa-solid fa-rotate-left"></i> Reset Form
+              </button>
+              <button type="submit" class="btn btn-primary" id="submitBtn">
+                <i class="fa-solid fa-save"></i> Save Student Record
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+      
+      <!-- SECTION: Student Records -->
+      <section id="records-section" class="app-section">
+        <!-- Records controls & action cards -->
+        <div class="glass-panel records-controls">
+          <!-- Search box -->
+          <div class="search-box">
+            <div class="input-container">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="searchBar" class="form-input" placeholder="Search by student name or ID...">
+            </div>
+          </div>
+          
+          <!-- Filters & Sorting options -->
+          <div class="filter-sort-group">
+            <div class="input-container no-icon">
+              <select id="filterYear" class="form-input">
+                <option value="All">All Years</option>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+              </select>
+            </div>
+            
+            <div class="input-container no-icon">
+              <select id="sortRecords" class="form-input">
+                <option value="default">Sort By: Default</option>
+                <option value="pct-desc">Percentage: High to Low</option>
+                <option value="pct-asc">Percentage: Low to High</option>
+                <option value="name-asc">Name: A to Z</option>
+                <option value="name-desc">Name: Z to A</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Export actions -->
+          <div class="records-actions">
+            <button class="btn btn-secondary" id="exportExcelBtn">
+              <i class="fa-solid fa-file-excel" style="color: #16a34a;"></i>
+              Excel
+            </button>
+            <button class="btn btn-secondary" id="exportPdfBtn">
+              <i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i>
+              PDF
+            </button>
+          </div>
+        </div>
+        
+        <!-- Table container -->
+        <div class="table-panel glass-panel">
+          <div class="table-wrapper">
+            <table class="custom-table" id="studentsTable">
+              <thead>
+                <tr>
+                  <th>Student Info</th>
+                  <th>Year</th>
+                  <th>English</th>
+                  <th>Physics</th>
+                  <th>Maths</th>
+                  <th>Hindi</th>
+                  <th>Total</th>
+                  <th class="sortable" id="thPercentage">Percentage <i class="fa-solid fa-sort"></i></th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentTableBody">
+                <!-- Dynamically filled -->
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Empty state layout -->
+          <div class="empty-state" id="emptyState">
+            <i class="fa-solid fa-folder-open empty-icon"></i>
+            <div class="empty-title">No Records Found</div>
+            <div class="empty-desc">Create a record by adding a new student and their semester grades.</div>
+            <button class="btn btn-primary" id="goToAddBtn">
+              <i class="fa-solid fa-user-plus"></i> Add Student Now
+            </button>
+          </div>
+        </div>
+      </section>
+      
+    </main>
+  </div>
+  
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="confirmDeleteModal">
+    <div class="modal-content glass-panel">
+      <div class="modal-header">
+        <h3 class="modal-title">Delete Record</h3>
+        <button class="modal-close" id="closeDeleteModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to permanently delete this student record? This action cannot be undone.</p>
+        <p style="margin-top: 1rem; font-weight: 600;" id="deleteTargetText"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JavaScript Logics -->
+  <script src="script.js"></script>
+</body>
+</html>
