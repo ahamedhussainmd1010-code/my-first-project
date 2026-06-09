@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>College Management System</title>
+
+<style>
+    *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+        font-family:Arial, sans-serif;
+    }
+
+    body{
+        background:#f4f6f9;
+        padding:20px;
+    }
+
+    .container{
+        max-width:1200px;
+        margin:auto;
+    }
+
+    h1{
+        text-align:center;
+        color:#2c3e50;
+        margin-bottom:20px;
+    }
+
+    .form-container{
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        box-shadow:0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom:20px;
+    }
+
+    .form-grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+        gap:15px;
+    }
+
+    input, select, button{
+        padding:10px;
+        border:1px solid #ccc;
+        border-radius:5px;
+        font-size:15px;
+    }
+
+    button{
+        background:#3498db;
+        color:white;
+        border:none;
+        cursor:pointer;
+    }
+
+    button:hover{
+        background:#2980b9;
+    }
+
+    .search-box{
+        width:100%;
+        margin-bottom:20px;
+    }
+
+    table{
+        width:100%;
+        border-collapse:collapse;
+        background:#fff;
+        box-shadow:0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    th, td{
+        padding:10px;
+        border:1px solid #ddd;
+        text-align:center;
+    }
+
+    th{
+        background:#3498db;
+        color:white;
+    }
+
+    .edit-btn{
+        background:#f39c12;
+    }
+
+    .delete-btn{
+        background:#e74c3c;
+    }
+
+    .edit-btn:hover{
+        background:#d68910;
+    }
+
+    .delete-btn:hover{
+        background:#c0392b;
+    }
+
+    @media(max-width:768px){
+        table{
+            display:block;
+            overflow-x:auto;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>College Management System</h1>
+
+    <div class="form-container">
+
+        <div class="form-grid">
+            <input type="text" id="name" placeholder="Student Name">
+            <input type="text" id="roll" placeholder="Roll Number">
+            <input type="text" id="year" placeholder="Year">
+            <input type="text" id="course" placeholder="Course">
+
+            <input type="number" id="english" placeholder="English Marks">
+            <input type="number" id="physics" placeholder="Physics Marks">
+            <input type="number" id="maths" placeholder="Maths Marks">
+            <input type="number" id="hindi" placeholder="Hindi Marks">
+
+            <input type="number" id="attendance" placeholder="Attendance %">
+
+            <button onclick="addStudent()">Save Student</button>
+        </div>
+
+    </div>
+
+    <input type="text" class="search-box" id="search"
+           placeholder="Search by Name or Roll Number"
+           onkeyup="searchStudent()">
+
+    <table id="studentTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Roll No</th>
+                <th>Year</th>
+                <th>Course</th>
+                <th>Total</th>
+                <th>Percentage</th>
+                <th>Attendance</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody id="studentBody">
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<script>
+
+let students = JSON.parse(localStorage.getItem("students")) || [];
+let editIndex = -1;
+
+displayStudents();
+
+function addStudent(){
+
+    let name = document.getElementById("name").value;
+    let roll = document.getElementById("roll").value;
+    let year = document.getElementById("year").value;
+    let course = document.getElementById("course").value;
+
+    let english = Number(document.getElementById("english").value);
+    let physics = Number(document.getElementById("physics").value);
+    let maths = Number(document.getElementById("maths").value);
+    let hindi = Number(document.getElementById("hindi").value);
+
+    let attendance = document.getElementById("attendance").value;
+
+    if(name === "" || roll === ""){
+        alert("Please fill required fields");
+        return;
+    }
+
+    let total = english + physics + maths + hindi;
+    let percentage = (total / 400 * 100).toFixed(2);
+
+    let student = {
+        name,
+        roll,
+        year,
+        course,
+        total,
+        percentage,
+        attendance
+    };
+
+    if(editIndex === -1){
+        students.push(student);
+    } else {
+        students[editIndex] = student;
+        editIndex = -1;
+    }
+
+    localStorage.setItem("students", JSON.stringify(students));
+
+    clearForm();
+    displayStudents();
+}
+
+function displayStudents(){
+
+    let body = document.getElementById("studentBody");
+
+    body.innerHTML = "";
+
+    students.forEach((student, index)=>{
+
+        body.innerHTML += `
+            <tr>
+                <td>${student.name}</td>
+                <td>${student.roll}</td>
+                <td>${student.year}</td>
+                <td>${student.course}</td>
+                <td>${student.total}</td>
+                <td>${student.percentage}%</td>
+                <td>${student.attendance}%</td>
+
+                <td>
+                    <button class="edit-btn"
+                            onclick="editStudent(${index})">
+                        Edit
+                    </button>
+
+                    <button class="delete-btn"
+                            onclick="deleteStudent(${index})">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+
+    });
+
+}
+
+function editStudent(index){
+
+    let student = students[index];
+
+    document.getElementById("name").value = student.name;
+    document.getElementById("roll").value = student.roll;
+    document.getElementById("year").value = student.year;
+    document.getElementById("course").value = student.course;
+    document.getElementById("attendance").value = student.attendance;
+
+    editIndex = index;
+}
+
+function deleteStudent(index){
+
+    if(confirm("Delete this student?")){
+
+        students.splice(index,1);
+
+        localStorage.setItem("students",
+            JSON.stringify(students));
+
+        displayStudents();
+    }
+}
+
+function searchStudent(){
+
+    let value =
+        document.getElementById("search")
+        .value
+        .toLowerCase();
+
+    let rows =
+        document.querySelectorAll("#studentBody tr");
+
+    rows.forEach(row=>{
+
+        let text =
+            row.textContent.toLowerCase();
+
+        row.style.display =
+            text.includes(value)
+            ? ""
+            : "none";
+
+    });
+
+}
+
+function clearForm(){
+
+    document.querySelectorAll("input")
+        .forEach(input=>{
+
+            if(input.id !== "search"){
+                input.value = "";
+            }
+
+        });
+
+}
+
+</script>
+
+</body>
+</html>
+------------------------------------------------------------------------------------------------------------------------------------------
+collage management system
